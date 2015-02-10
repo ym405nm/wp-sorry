@@ -63,11 +63,15 @@ class WpSorry {
 		$sorry = get_option("wpsorry");
 		$is_malware = $this->is_malware($sorry["defaced_malware"]);
 		$is_breach = $this->is_breach($sorry["breach"]);
+		$affected = esc_html($sorry["affected"]);
 		$str = <<< EOF
 <p>この度、弊社ウェブサイトに第三者からの不正なアクセスがあり、ウェブサイトが改ざんされていたことがわかりました。ご利用の皆様にはご迷惑をお掛けしましたことを心よりお詫び申し上げます。</p>
 
 <h2>改ざんされた期間</h2>
-{$sorry["start_year"]}年{$sorry["start_month"]}月{$sorry["start_day"]}日{$sorry["start_time"]}時ごろから{$sorry["end_year"]}年{$sorry["end_month"]}月{$sorry["end_day"]}日{$sorry["end_time"]}時ごろまで
+<p>{$sorry["start_year"]}年{$sorry["start_month"]}月{$sorry["start_day"]}日{$sorry["start_time"]}時ごろから{$sorry["end_year"]}年{$sorry["end_month"]}月{$sorry["end_day"]}日{$sorry["end_time"]}時ごろまで</p>
+
+<h2>影響範囲</h2>
+<p>{$affected}</p>
 
 {$is_malware}
 
@@ -83,7 +87,7 @@ EOF;
 			//マルウェア感染あり
 			$str = <<< EOF
 <h2>お客様へのお願い</h2>
-当該期間にアクセスした可能性のある方は、お手数ですが最新の状態にアップデートしたウイルス対策ソフトにて駆除をお願いいたします。
+<p>当該期間にアクセスした可能性のある方は、お手数ですが最新の状態にアップデートしたウイルス対策ソフトにて駆除をお願いいたします。</P>
 EOF;
 		}else{
 			//マルウェア感染なし
