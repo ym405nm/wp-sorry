@@ -22,7 +22,6 @@ class WpSorry {
 		if(isset($_POST["wpsorry"])){
 			update_option('wpsorry', $_POST["wpsorry"]);?>
 			<div class="updated fade"><p><strong>謝罪文の準備ができました</strong></p></div><?php 
-			print_r(get_option("wpsorry"));
 		}
 		?>
 <form action="" method="post">
