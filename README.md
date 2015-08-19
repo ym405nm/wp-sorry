@@ -11,3 +11,9 @@
 4. 新規ページを選んでください
 5. タイトルを入力してください
 6. 本文中にショートコード[wpsorry]を入力してください
+
+## PDF を使用する場合
+
+本機能は TCPDF を使用しています。以下のサイトからダウロードしてプラグインのルート ( plugins/wp-sorry ) にディレクトリごと格納してください。
+
+TCPDF http://sourceforge.net/projects/tcpdf/files/

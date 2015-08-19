@@ -19,7 +19,15 @@ class WpSorry {
 	function wp_sorry_settings() {?>
 <h1>設定</h1>
 	<?php 
-		if(isset($_POST["wpsorry"])){
+		if(isset($_POST["wpsorry"]) && strcmp("1", $_POST["pdf"])==0){
+			update_option('wpsorry', $_POST["wpsorry"]);
+			$pdf = $this->create_pdf();
+			if(!$pdf):
+				?><div class="updated fade"><p><strong>TCPDFが読み込めないため、PDFを作成できません</strong></p></div><?php
+			else:
+				?><div class="updated fade"><p><strong>PDFの準備ができました</strong> <a href="<?php echo plugins_url(); ?>/wp-sorry/wp-sorry.pdf" target="_blank">ダウンロード</a></p></div><?php
+			endif;
+		}elseif(isset($_POST["wpsorry"])){
 			update_option('wpsorry', $_POST["wpsorry"]);?>
 			<div class="updated fade"><p><strong>謝罪文の準備ができました</strong></p></div><?php 
 		}
@@ -55,6 +63,8 @@ class WpSorry {
 <li><input type="checkbox" name="wpsorry[breach][card]" value="クレジット番号">クレジット番号</li>
 <li><input type="checkbox" name="wpsorry[breach][securitycode]" value="セキュリティコード">セキュリティコード</li>
 </ul>
+<h2>オプション</h2>
+<p><input type="checkbox" name="pdf" value="1">PDFファイルとして出力</p>
 <input type="submit" class="button-primary" value="登録/変更" >
 </form>
 <?php
@@ -114,6 +124,29 @@ EOF;
 EOF;
 		}
 		return $str;
+	}
+
+	function create_pdf(){
+		$tcpdf_path = plugin_dir_path( __FILE__ ).'tcpdf/tcpdf.php';
+		if (!file_exists($tcpdf_path)){
+			return false;
+		}
+		require_once(plugin_dir_path( __FILE__ ).'tcpdf/tcpdf.php');
+		$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true); 
+		$pdf->AddPage();
+		$font1 = $pdf->SetFont('kozgopromedium');
+		$pdf->SetFont($font1, '');
+		//$pdf->Text( 10, 10, $this->create_text() );
+		$description = $this->create_text();
+		$header = <<< EOF
+<br>
+<h1 style="text-align:center">当サイトの改ざんのお詫びとご報告</h1>
+<br><br><br>
+EOF;
+		$description = $header . $description;
+		$pdf->writeHTML($description);
+		$pdf->Output(plugin_dir_path( __FILE__ )."wp-sorry.pdf", "F");
+		return true;
 	}
 }
 $wpSorry = new WpSorry;
