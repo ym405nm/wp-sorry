@@ -12,6 +12,7 @@ class WpSorry {
 	function __construct() {
 		add_action('admin_menu', array($this, 'add_pages'));
 		add_shortcode('wpsorry', array($this, 'create_text'));
+		add_shortcode('wpsorrycss', array($this, 'create_css'));
 	}
 	function add_pages() {
 		add_menu_page('謝罪文作成','謝罪文作成',  'level_8', __FILE__, array($this,'wp_sorry_settings'), '', 26);
@@ -147,6 +148,41 @@ EOF;
 		$pdf->writeHTML($description);
 		$pdf->Output(plugin_dir_path( __FILE__ )."wp-sorry.pdf", "F");
 		return true;
+	}
+
+	function create_css(){
+		$sorry = get_option("wpsorry");
+		$is_malware = $this->is_malware($sorry["defaced_malware"]);
+		$is_malware =preg_replace("/お客様へのお願い/", "[ お客様へのお願い ]  ", $is_malware);
+		$is_malware = preg_replace("/(<(\/|)[a-zA-Z0-9]*>|\n)/", "", $is_malware);
+		$is_breach = $this->is_breach($sorry["breach"]);
+		$is_breach = preg_replace("/漏えいした個人情報/", "[ 漏えいした個人情報 ]  ", $is_breach);
+		$is_breach = preg_replace("/<\/li><li>/", "、 ", $is_breach);
+		$is_breach = preg_replace("/<(\/|)[a-zA-Z0-9]*>/", "", $is_breach);
+		$affected = esc_html($sorry["affected"]);
+		$str = <<< EOF
+<style>
+#s p:nth-child(1):before {
+  content: "この度、弊社ウェブサイトに第三者からの不正なアクセスがあり、ウェブサイトが改"; }
+#s p:nth-child(1):after {
+  content: "ざんされていたことがわかりました。ご利用の皆様にはご迷惑をお掛けしましたことを心よりお詫び申し上げます。"; }
+#s p:nth-child(2):before {
+  content: "改ざんされた期間 : "; }
+#s p:nth-child(2):after {
+  content: "{$sorry["start_year"]}年{$sorry["start_month"]}月{$sorry["start_day"]}日{$sorry["start_time"]}時ごろから{$sorry["end_year"]}年{$sorry["end_month"]}月{$sorry["end_day"]}日{$sorry["end_time"]}時ごろまで"; }
+#s p:nth-child(3):before {
+  content: "影響範囲 : "; }
+#s p:nth-child(3):after {
+  content: "{$affected}"; }
+#s p:nth-child(4):before {
+  content: "{$is_malware}"; }
+#s p:nth-child(5):before {
+  content: "{$is_breach}"; }
+
+</style>
+<div id="s"><p><p><p><p><p></div>
+EOF;
+		return $str;
 	}
 }
 $wpSorry = new WpSorry;
