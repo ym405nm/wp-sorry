@@ -20,8 +20,27 @@ class WpSorry {
 	function wp_sorry_settings() {?>
 <h1>設定</h1>
 	<?php 
+		
 		if(isset($_POST["wpsorry"]) && strcmp("1", $_POST["pdf"])==0){
-			update_option('wpsorry', $_POST["wpsorry"]);
+
+			//change
+			if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'wp-sorry' ) ) {	
+ 			   die( 'Security check' ); 
+			}
+			$sorry = $_POST['wpsorry'];			
+			if(!checkdate(intval($sorry['start_month']),intval($sorry['start_day']),intval($sorry['start_year'])) ){
+				die( 'Security check' );
+			}
+			
+			if(!checkdate(intval($sorry['end_month']),intval($sorry['end_day']),intval($sorry['end_year'])) ){
+				die( 'Security check' );
+			}
+			if(!preg_match("/^[0-9]{1,2}$/",$sorry['start_time']) or intval($sorry['start_time']) < 0 or intval($sorry['start_time']) > 25){
+				die( 'Security check' );}
+			if(!preg_match("/^[0-9]{1,2}$/",$sorry['end_time']) or intval($sorry['end_time']) < 0 or intval($sorry['end_time']) > 25){
+				die( 'Security check' );
+			}
+			update_option('wpsorry', $sorry);
 			$pdf = $this->create_pdf();
 			if(!$pdf):
 				?><div class="updated fade"><p><strong>TCPDFが読み込めないため、PDFを作成できません</strong></p></div><?php
@@ -29,11 +48,36 @@ class WpSorry {
 				?><div class="updated fade"><p><strong>PDFの準備ができました</strong> <a href="<?php echo plugins_url(); ?>/wp-sorry/wp-sorry.pdf" target="_blank">ダウンロード</a></p></div><?php
 			endif;
 		}elseif(isset($_POST["wpsorry"])){
-			update_option('wpsorry', $_POST["wpsorry"]);?>
+			
+			//change
+			if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'wp-sorry' ) ) {	
+ 			   die( 'Security check' ); 
+			}
+			$sorry = $_POST['wpsorry'];			
+			if(!checkdate(intval($sorry['start_month']),intval($sorry['start_day']),intval($sorry['start_year'])) ){
+				die( 'Security check' );
+			}
+			
+			if(!checkdate(intval($sorry['end_month']),intval($sorry['end_day']),intval($sorry['end_year'])) ){
+				die( 'Security check' );
+			}
+			if(!preg_match("/^[0-9]{1,2}$/",$sorry['start_time']) or intval($sorry['start_time']) < 0 or intval($sorry['start_time']) > 25){
+				die( 'Security check' );}
+			if(!preg_match("/^[0-9]{1,2}$/",$sorry['end_time']) or intval($sorry['end_time']) < 0 or intval($sorry['end_time']) > 25){
+				die( 'Security check' );
+			}
+			update_option('wpsorry', $sorry);
+			?>
 			<div class="updated fade"><p><strong>謝罪文の準備ができました</strong></p></div><?php 
 		}
 		?>
+	
 <form action="" method="post">
+
+<?php $nonce = wp_create_nonce('wp-sorry'); ?>
+
+<input type="hidden" name="_wpnonce" value="<?php echo $nonce; ?>">
+
 <h2>全体</h2>
 <ul>
 <li>いつから？
@@ -91,7 +135,7 @@ class WpSorry {
 EOF;
 		return $str;
 	}
-	
+
 	function is_malware($is_malware){
 		$str = "";
 		if(strcmp($is_malware,"1")==0){
@@ -186,3 +230,5 @@ EOF;
 	}
 }
 $wpSorry = new WpSorry;
+
+
