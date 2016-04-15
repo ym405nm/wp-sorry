@@ -27,19 +27,8 @@ class WpSorry {
 			if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'wp-sorry' ) ) {	
  			   die( 'Security check' ); 
 			}
-			$sorry = $_POST['wpsorry'];			
-			if(!checkdate(intval($sorry['start_month']),intval($sorry['start_day']),intval($sorry['start_year'])) ){
-				die( 'Security check' );
-			}
-			
-			if(!checkdate(intval($sorry['end_month']),intval($sorry['end_day']),intval($sorry['end_year'])) ){
-				die( 'Security check' );
-			}
-			if(!preg_match("/^[0-9]{1,2}$/",$sorry['start_time']) or intval($sorry['start_time']) < 0 or intval($sorry['start_time']) > 25){
-				die( 'Security check' );}
-			if(!preg_match("/^[0-9]{1,2}$/",$sorry['end_time']) or intval($sorry['end_time']) < 0 or intval($sorry['end_time']) > 25){
-				die( 'Security check' );
-			}
+			$sorry = $_POST['wpsorry'];
+
 			update_option('wpsorry', $sorry);
 			$pdf = $this->create_pdf();
 			if(!$pdf):
@@ -54,18 +43,7 @@ class WpSorry {
  			   die( 'Security check' ); 
 			}
 			$sorry = $_POST['wpsorry'];			
-			if(!checkdate(intval($sorry['start_month']),intval($sorry['start_day']),intval($sorry['start_year'])) ){
-				die( 'Security check' );
-			}
-			
-			if(!checkdate(intval($sorry['end_month']),intval($sorry['end_day']),intval($sorry['end_year'])) ){
-				die( 'Security check' );
-			}
-			if(!preg_match("/^[0-9]{1,2}$/",$sorry['start_time']) or intval($sorry['start_time']) < 0 or intval($sorry['start_time']) > 25){
-				die( 'Security check' );}
-			if(!preg_match("/^[0-9]{1,2}$/",$sorry['end_time']) or intval($sorry['end_time']) < 0 or intval($sorry['end_time']) > 25){
-				die( 'Security check' );
-			}
+
 			update_option('wpsorry', $sorry);
 			?>
 			<div class="updated fade"><p><strong>謝罪文の準備ができました</strong></p></div><?php 
