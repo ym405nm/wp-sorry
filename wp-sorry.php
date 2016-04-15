@@ -15,7 +15,7 @@ class WpSorry {
 		add_shortcode('wpsorrycss', array($this, 'create_css'));
 	}
 	function add_pages() {
-		add_menu_page('謝罪文作成','謝罪文作成',  'level_8', __FILE__, array($this,'wp_sorry_settings'), '', 26);
+		add_menu_page('謝罪文作成','謝罪文作成',  'level_8', __FILE__, array($this,'wp_sorry_settings'), '');
 	}
 	function wp_sorry_settings() {?>
 <h1>設定</h1>
