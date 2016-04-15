@@ -7,7 +7,7 @@ Author: yoshinori matsumoto
 Version: 0.1
 Author URI: https://twitter.com/ym405nm
 */
- 
+
 class WpSorry {
 	function __construct() {
 		add_action('admin_menu', array($this, 'add_pages'));
@@ -19,13 +19,13 @@ class WpSorry {
 	}
 	function wp_sorry_settings() {?>
 <h1>設定</h1>
-	<?php 
-		
+	<?php
+
 		if(isset($_POST["wpsorry"]) && strcmp("1", $_POST["pdf"])==0){
 
 			//change
-			if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'wp-sorry' ) ) {	
- 			   die( 'Security check' ); 
+			if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'wp-sorry' ) ) {
+ 			   die( 'Security check' );
 			}
 			$sorry = $_POST['wpsorry'];
 
@@ -37,19 +37,19 @@ class WpSorry {
 				?><div class="updated fade"><p><strong>PDFの準備ができました</strong> <a href="<?php echo plugins_url(); ?>/wp-sorry/wp-sorry.pdf" target="_blank">ダウンロード</a></p></div><?php
 			endif;
 		}elseif(isset($_POST["wpsorry"])){
-			
+
 			//change
-			if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'wp-sorry' ) ) {	
- 			   die( 'Security check' ); 
+			if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'wp-sorry' ) ) {
+ 			   die( 'Security check' );
 			}
-			$sorry = $_POST['wpsorry'];			
+			$sorry = $_POST['wpsorry'];
 
 			update_option('wpsorry', $sorry);
 			?>
-			<div class="updated fade"><p><strong>謝罪文の準備ができました</strong></p></div><?php 
+			<div class="updated fade"><p><strong>謝罪文の準備ができました</strong></p></div><?php
 		}
 		?>
-	
+
 <form action="" method="post">
 
 <?php $nonce = wp_create_nonce('wp-sorry'); ?>
@@ -97,20 +97,25 @@ class WpSorry {
 		$is_malware = $this->is_malware($sorry["defaced_malware"]);
 		$is_breach = $this->is_breach($sorry["breach"]);
 		$affected = esc_html($sorry["affected"]);
-		$str = <<< EOF
-<p>この度、弊社ウェブサイトに第三者からの不正なアクセスがあり、ウェブサイトが改ざんされていたことがわかりました。ご利用の皆様にはご迷惑をお掛けしましたことを心よりお詫び申し上げます。</p>
+		$str          = file_get_contents( WP_PLUGIN_DIR . "/wp-sorry/templete.html" );
+		$params_array = array(
+			"start_year",
+			"start_month",
+			"start_day",
+			"start_time",
+			"end_year",
+			"end_month",
+			"end_day",
+			"end_time"
+		);
+		foreach ( $params_array as $param_key ) {
+			$str = str_replace( "[" . $param_key . "]", esc_html( $sorry[ $param_key ] ), $str );
+		}
 
-<h2>改ざんされた期間</h2>
-<p>{$sorry["start_year"]}年{$sorry["start_month"]}月{$sorry["start_day"]}日{$sorry["start_time"]}時ごろから{$sorry["end_year"]}年{$sorry["end_month"]}月{$sorry["end_day"]}日{$sorry["end_time"]}時ごろまで</p>
+		$str = str_replace( "[is_malware]", $is_malware, $str );
+		$str = str_replace( "[is_breach]", $is_breach, $str );
+		$str = str_replace( "[affected]", $affected, $str );
 
-<h2>影響範囲</h2>
-<p>{$affected}</p>
-
-{$is_malware}
-
-{$is_breach}
-
-EOF;
 		return $str;
 	}
 
@@ -130,7 +135,7 @@ EOF;
 		}
 		return $str;
 	}
-	
+
 	function is_breach($is_breach){
 		$str = "";
 		if(count($is_breach)>0){
@@ -155,7 +160,7 @@ EOF;
 			return false;
 		}
 		require_once(plugin_dir_path( __FILE__ ).'tcpdf/tcpdf.php');
-		$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true); 
+		$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true);
 		$pdf->AddPage();
 		$font1 = $pdf->SetFont('kozgopromedium');
 		$pdf->SetFont($font1, '');
