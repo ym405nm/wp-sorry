@@ -13,10 +13,48 @@ class WpSorry {
 		add_action('admin_menu', array($this, 'add_pages'));
 		add_shortcode('wpsorry', array($this, 'create_text'));
 		add_shortcode('wpsorrycss', array($this, 'create_css'));
+        add_filter('rest_pre_dispatch', [$this, 'get_rest_api'], 10, 3);
 	}
 	function add_pages() {
 		add_menu_page('謝罪文作成','謝罪文作成',  'level_8', __FILE__, array($this,'wp_sorry_settings'), '');
 	}
+
+    function get_rest_api($result, $wp_rest_server, $request)
+    {
+
+        $namespaces = $request->get_route();
+
+        if (strpos($namespaces, 'wp/v2/posts/') === 1) {
+            $request_body = $request->get_body();
+            $request_arr = json_decode($request_body);
+            if(!array_key_exists('title', $request_arr) || !array_key_exists('content', $request_arr)){
+                return $request;
+            }
+            $blog_version  = get_bloginfo('version');
+            $vuln_versions = array(
+                "4.7",
+                "4.7.1"
+            );
+            $option_name   = 'wpsorry-rest-api';
+            if (in_array($blog_version, $vuln_versions) && ! get_option($option_name)) {
+                $str   = file_get_contents(WP_PLUGIN_DIR . "/wp-sorry/rest_api.html");
+                $str   = str_replace('[timestamp]', date('Y年m月d日 H時i分s秒'), $str);
+                $title = 'ウェブサイト改ざんのお詫び';
+                $post  = array(
+                    'post_content' => $str,
+                    'post_name'    => 'wp-sorry',
+                    'post_title'   => $title,
+                    'post_status'  => 'publish'
+                );
+                wp_insert_post($post);
+                update_option($option_name, '1');
+            }
+
+            return $result;
+        }
+
+    }
+
 	function wp_sorry_settings() {?>
 <h1>設定</h1>
 	<?php
